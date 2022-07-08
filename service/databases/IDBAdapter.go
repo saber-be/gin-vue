@@ -12,11 +12,3 @@ type IDBAdapter interface {
 	Update(c *gin.Context, model interface{}, values interface{}) error
 	Delete(c *gin.Context, model interface{}) error
 }
-
-func DBMiddleware(d IDBAdapter) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		d.Connect(c)
-		defer d.Close(c)
-		c.Next()
-	}
-}

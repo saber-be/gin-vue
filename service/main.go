@@ -3,6 +3,7 @@ package main
 import (
 	"qgen/challange/controllers"
 	"qgen/challange/databases"
+	"qgen/challange/middlewares"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,7 +11,8 @@ import (
 func main() {
 	ginEngin := gin.Default()
 	DBAdapter := databases.NewSQLAdapter()
-	ginEngin.Use(databases.DBMiddleware(DBAdapter))
+	ginEngin.Use(middlewares.CORSMiddleware())
+	ginEngin.Use(middlewares.DBMiddleware(DBAdapter))
 
 	// Routes
 	v1 := ginEngin.Group("/api/v1")
