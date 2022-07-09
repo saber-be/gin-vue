@@ -17,7 +17,7 @@ func NewSQLAdapter() *SQLDB {
 
 // Connect to the database
 func (d *SQLDB) Connect() error {
-	database, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	database, err := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
 
 	if err != nil {
 		panic("Failed to connect to database!")

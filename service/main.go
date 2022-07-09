@@ -4,13 +4,16 @@ import (
 	"qgen/challange/controllers"
 	"qgen/challange/databases"
 	"qgen/challange/middlewares"
+	"qgen/challange/seeds"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	ginEngin := gin.Default()
 	DBAdapter := databases.NewSQLAdapter()
+	seeds.SeedUsers(DBAdapter)
+
+	ginEngin := gin.Default()
 	ginEngin.Use(middlewares.CORSMiddleware())
 	ginEngin.Use(middlewares.DBMiddleware(DBAdapter))
 
