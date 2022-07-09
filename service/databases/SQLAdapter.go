@@ -43,11 +43,12 @@ func (d *SQLDB) Find(models_list interface{}, pagination *models.Pagination, con
 	if pagination != nil {
 		p := *pagination
 		offset := (p.Page - 1) * p.Limit
-		queryBuilder := d.db.Model(models_list).Limit(p.Limit).Offset(offset).Order(p.Sort)
+		queryBuilder := d.db.Model(models_list)
 		if len(conds) > 1 {
 			queryBuilder = queryBuilder.Where(conds[0], conds[1:]...)
 		}
 		queryBuilder.Count(&pagination.Total)
+		queryBuilder.Limit(p.Limit).Offset(offset).Order(p.Sort)
 		return queryBuilder.Find(models_list).Error
 	}
 
