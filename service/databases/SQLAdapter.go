@@ -39,7 +39,18 @@ func (d *SQLDB) Create(model interface{}) error {
 }
 
 // Read a record from the database
-func (d *SQLDB) Find(models_list interface{}, conds ...interface{}) error {
+func (d *SQLDB) Find(models_list interface{}, pagination *models.Pagination, conds ...interface{}) error {
+	if pagination != nil {
+		p := *pagination
+		offset := (p.Page - 1) * p.Limit
+		queryBuilder := d.db.Model(models_list).Limit(p.Limit).Offset(offset).Order(p.Sort)
+		if len(conds) > 1 {
+			queryBuilder = queryBuilder.Where(conds[0], conds[1:]...)
+		}
+		queryBuilder.Count(&pagination.Total)
+		return queryBuilder.Find(models_list).Error
+	}
+
 	return d.db.Find(models_list, conds).Error
 }
 
