@@ -10,22 +10,33 @@ import (
 
 // GET /users
 // Get all users
-func AllUsers(c *gin.Context) {
+func GetUsers(c *gin.Context) {
 	var users []models.User
 	DBInstance := c.MustGet("db").(databases.IDBAdapter)
-	DBInstance.Find(&users)
 
-	c.JSON(http.StatusOK, gin.H{"data": users})
+	// init pagination
+	pagination := models.Pagination{}
+	pagination.Init(c)
+
+	// get search key from query
+	search := c.Query("search")
+	if search != "" {
+		DBInstance.Find(&users, &pagination, "name like ?", "%"+search+"%")
+	} else {
+		DBInstance.Find(&users, &pagination)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": users, "pagination": pagination})
 }
 
 // GET /users/:id
 // Find a user
-func FindUser(c *gin.Context) {
+func GetUserByID(c *gin.Context) {
 	// Get model if exist
 	var user []models.User
 	DBInstance := c.MustGet("db").(databases.IDBAdapter)
 
-	DBInstance.Find(&user, "id = ?", c.Param("id"))
+	DBInstance.Find(&user, nil, "id = ?", c.Param("id"))
 	if len(user) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
@@ -60,7 +71,7 @@ func UpdateUser(c *gin.Context) {
 	var user []models.User
 	DBInstance := c.MustGet("db").(databases.IDBAdapter)
 
-	DBInstance.Find(&user, "id = ?", c.Param("id"))
+	DBInstance.Find(&user, nil, "id = ?", c.Param("id"))
 	if len(user) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
@@ -86,7 +97,7 @@ func DeleteUser(c *gin.Context) {
 	var user []models.User
 	DBInstance := c.MustGet("db").(databases.IDBAdapter)
 
-	DBInstance.Find(&user, "id = ?", c.Param("id"))
+	DBInstance.Find(&user, nil, "id = ?", c.Param("id"))
 	if len(user) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return

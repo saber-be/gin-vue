@@ -19,8 +19,8 @@ func main() {
 	{
 		eg := v1.Group("/users")
 		{
-			eg.GET("/", controllers.AllUsers)
-			eg.GET("/:id", controllers.FindUser)
+			eg.GET("/", controllers.GetUsers)
+			eg.GET("/:id", controllers.GetUserByID)
 			eg.POST("/", controllers.CreateUser)
 			eg.PATCH("/:id", controllers.UpdateUser)
 			eg.DELETE("/:id", controllers.DeleteUser)
