@@ -1,13 +1,13 @@
 <template>
     <div>
-    <el-table :data="filteredUsers" style="width: 85%;margin: auto">
+    <el-table :data="users" style="width: 85%;margin: auto">
     <el-table-column prop="id" label="ID" width="60" />
     <el-table-column prop="name" label="Name" width="120" />
     <el-table-column prop="email" label="Email" width="180" />
     <el-table-column prop="phone" label="Phone" width="180" />
     <el-table-column align="right">
       <template #header>
-        <el-input v-model="search" size="small" placeholder="Type to search" />
+        <el-input v-debounce:300ms="getUsers" v-model="search" size="small" placeholder="Type to search" />
       </template>
       <template #default="scope">
         <el-button size="small" @click="handleEdit(scope.$index, scope.row)"
@@ -42,21 +42,12 @@ export default {
   created() {
     this.getUsers();
   },
-  computed: {
-    filteredUsers() {
-      var self = this;
-      return this.users.filter(item => {
-        return self.search == '' || item.name.toLowerCase().includes(self.search.toLowerCase())
-      });
-    }
-  },
   methods: {
     getUsers() {
-      fetch('http://localhost:8086/api/v1/users/')
+      fetch('http://localhost:8086/api/v1/users/?search='+this.search)
         .then(response => response.json())
         .then(json => {
           this.users = json.data;
-          console.log(this.users );
         })
     }
   }
