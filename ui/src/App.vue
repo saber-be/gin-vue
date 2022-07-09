@@ -1,9 +1,9 @@
 <template>
-    <div>
-    <el-table :data="users" style="width: 85%;margin: auto">
+    <div style="width: 85%;margin: auto">
+    <el-table :data="users" >
     <el-table-column prop="id" label="ID" width="60" />
-    <el-table-column prop="name" label="Name" width="120" />
-    <el-table-column prop="email" label="Email" width="180" />
+    <el-table-column prop="name" label="Name" width="200" />
+    <el-table-column prop="email" label="Email" width="200" />
     <el-table-column prop="phone" label="Phone" width="180" />
     <el-table-column align="right">
       <template #header>
@@ -19,7 +19,7 @@
           :icon="InfoFilled"
           icon-color="#626AEF"
           title="Are you sure to delete this?"
-          @confirm="confirmDeleteEvent"
+          @confirm="confirmEvent"
           @cancel="cancelEvent"
         >
           <template #reference>
@@ -34,6 +34,9 @@
       </template>
     </el-table-column>
   </el-table>
+  <el-button size="small" @click="handleCreate()"
+          >add New user</el-button
+        >
   <el-pagination background layout="prev, pager, next" 
     :total="pagination.total"  
     @prev-click="prevPage" 
@@ -42,7 +45,33 @@
     :current-page="pagination.page"
     :page-size="pagination.limit"  
   />
+  
+  <!-- user modal -->
+  <el-dialog v-model="dialogFormVisible" title="Edit user info">
+    <el-form :model="selected_user">
+      <el-form-item label="Name" :label-width="formLabelWidth">
+        <el-input v-model="selected_user.name" autocomplete="off" />
+      </el-form-item>
+      <el-form-item label="Email" :label-width="formLabelWidth">
+        <el-input v-model="selected_user.email" autocomplete="off" />
+      </el-form-item>
+      <el-form-item label="Phone" :label-width="formLabelWidth">
+        <el-input v-model="selected_user.phone" autocomplete="off" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="confirmEvent"
+          >Confirm</el-button
+        >
+      </span>
+    </template>
+  </el-dialog>
+
   </div>
+
+
 </template>
 
 <script>
@@ -58,6 +87,13 @@ export default {
       search : '',
       users : [],
       selected_user : {},
+      dialogFormVisible : false,
+      action : '',
+      actions:{
+        'create' : this.createUser,
+        'update' : this.updateUser,
+        'delete' : this.deleteUser
+      },
       pagination : {
         page : 1,
         limit : 12,
@@ -77,7 +113,37 @@ export default {
           this.pagination = json.pagination;
         })
     },
-    deleteUsers(id) {
+    createUser() {
+      fetch('http://localhost:8086/api/v1/users/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(this.selected_user)
+      })
+        
+        .then(res => {
+          console.log(res.json);
+          // if status code is 200
+          
+          if (res.ok) {
+            this.dialogFormVisible = false;
+            this.getUsers();
+            ElNotification.success({
+              title: 'Success',
+              message: 'User created successfully',
+              duration: 2000
+            })
+          } else {
+            ElNotification.error({
+              title: 'Error',
+              message: res.json.message,
+              duration: 2000
+            })
+          }
+        })
+    },
+    deleteUser(id) {
       fetch('http://localhost:8086/api/v1/users/'+id, {
         method: 'DELETE',
         headers: {
@@ -95,6 +161,26 @@ export default {
           })
         })
     },
+    updateUser(id) {
+      fetch('http://localhost:8086/api/v1/users/'+id, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(this.selected_user)
+      })
+        .then(response => response.json())
+        .then(json => {
+          console.log(json);
+          this.getUsers();
+          ElNotification({
+            title: 'Success',
+            message: 'User updated successfully',
+            type: 'success',
+          })
+          this.dialogFormVisible = false
+        })
+    },
     prevPage(val) {
       this.pagination.page = val;
     },
@@ -105,18 +191,33 @@ export default {
       this.pagination.page = val;
       this.getUsers();
     },
-    handleDelete(index, row){
-      console.log(index, row.id);
-      this.selected_user = row;
+    handleCreate(){
+      this.action = 'create'
+      this.selected_user = {
+        name : null,
+        email : null,
+        phone: null
+      }
+      this.dialogFormVisible = true;
     },
-    confirmDeleteEvent() {
-      console.log(this.selected_user)
-      this.deleteUsers(this.selected_user.id);
-    },    
+    handleEdit(_index, row) {
+      this.selected_user = row;
+      this.dialogFormVisible = true;
+      this.action= 'update'
+    },
+    handleDelete(_index, row){
+      this.selected_user = row;
+      this.action = 'delete'
+    },
+  
     cancelEvent() {
       console.log('cancel');
       this.selected_user = {};
+      this.action = '';
     },
+    confirmEvent() {
+      this.actions[this.action](this.selected_user.id);
+    }
 
   }
 }
