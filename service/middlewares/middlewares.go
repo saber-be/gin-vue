@@ -25,8 +25,9 @@ func CORSMiddleware() gin.HandlerFunc {
 
 func DBMiddleware(d databases.IDBAdapter) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		d.Connect(c)
-		defer d.Close(c)
+		d.Connect()
+		c.Set("db", d)
+		defer d.Close()
 		c.Next()
 	}
 }

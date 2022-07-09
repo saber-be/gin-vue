@@ -13,7 +13,7 @@ import (
 func AllUsers(c *gin.Context) {
 	var users []models.User
 	DBInstance := c.MustGet("db").(databases.IDBAdapter)
-	DBInstance.Find(c, &users)
+	DBInstance.Find(&users)
 
 	c.JSON(http.StatusOK, gin.H{"data": users})
 }
@@ -25,7 +25,7 @@ func FindUser(c *gin.Context) {
 	var user []models.User
 	DBInstance := c.MustGet("db").(databases.IDBAdapter)
 
-	DBInstance.Find(c, &user, "id = ?", c.Param("id"))
+	DBInstance.Find(&user, "id = ?", c.Param("id"))
 	if len(user) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
@@ -48,7 +48,7 @@ func CreateUser(c *gin.Context) {
 	// Create user
 	user := models.User{Name: input.Name, Email: input.Email, Phone: input.Phone}
 	DBInstance := c.MustGet("db").(databases.IDBAdapter)
-	DBInstance.Create(c, &user)
+	DBInstance.Create(&user)
 
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
@@ -60,7 +60,7 @@ func UpdateUser(c *gin.Context) {
 	var user []models.User
 	DBInstance := c.MustGet("db").(databases.IDBAdapter)
 
-	DBInstance.Find(c, &user, "id = ?", c.Param("id"))
+	DBInstance.Find(&user, "id = ?", c.Param("id"))
 	if len(user) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
@@ -74,7 +74,7 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	DBInstance.Update(c, &user[0], models.User{Name: input.Name, Email: input.Email, Phone: input.Phone})
+	DBInstance.Update(&user[0], models.User{Name: input.Name, Email: input.Email, Phone: input.Phone})
 
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
@@ -86,13 +86,13 @@ func DeleteUser(c *gin.Context) {
 	var user []models.User
 	DBInstance := c.MustGet("db").(databases.IDBAdapter)
 
-	DBInstance.Find(c, &user, "id = ?", c.Param("id"))
+	DBInstance.Find(&user, "id = ?", c.Param("id"))
 	if len(user) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
 	}
 
-	DBInstance.Delete(c, &user)
+	DBInstance.Delete(&user)
 
 	c.JSON(http.StatusOK, gin.H{"data": true})
 }
