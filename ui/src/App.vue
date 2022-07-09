@@ -22,6 +22,14 @@
       </template>
     </el-table-column>
   </el-table>
+  <el-pagination background layout="prev, pager, next" 
+    :total="pagination.total"  
+    @prev-click="prevPage" 
+    @next-click="nextPage" 
+    @current-change="handleCurrentChange"
+    :current-page="pagination.page"
+    :page-size="pagination.limit"  
+  />
   </div>
 </template>
 
@@ -36,7 +44,12 @@ export default {
   data() {
     return {
       search : '',
-      users : []
+      users : [],
+      pagination : {
+        page : 1,
+        limit : 12,
+        total : 0
+      },
     }
   },
   created() {
@@ -44,12 +57,23 @@ export default {
   },
   methods: {
     getUsers() {
-      fetch('http://localhost:8086/api/v1/users/?search='+this.search)
+      fetch('http://localhost:8086/api/v1/users/?search='+this.search+'&page='+this.pagination.page+'&limit='+this.pagination.limit)
         .then(response => response.json())
         .then(json => {
           this.users = json.data;
+          this.pagination = json.pagination;
         })
-    }
+    },
+    prevPage(val) {
+      this.pagination.page = val
+    },
+    nextPage(val) {
+      this.pagination.page = val;
+    },
+    handleCurrentChange(val) {
+      this.pagination.page = val;
+      this.getUsers();
+    },
   }
 }
 </script>
