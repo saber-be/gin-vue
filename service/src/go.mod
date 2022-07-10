@@ -4,11 +4,19 @@ go 1.18
 
 require (
 	github.com/gin-gonic/gin v1.8.1
+	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
+	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
+	github.com/sirupsen/logrus v1.8.1
 	gorm.io/driver/mysql v1.3.4
 	gorm.io/gorm v1.23.8
 )
 
-require github.com/go-sql-driver/mysql v1.6.0 // indirect
+require (
+	github.com/go-sql-driver/mysql v1.6.0 // indirect
+	github.com/jonboulle/clockwork v0.3.0 // indirect
+	github.com/lestrrat-go/strftime v1.0.6 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+)
 
 require (
 	github.com/bxcodec/faker/v3 v3.8.0

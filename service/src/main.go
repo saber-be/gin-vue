@@ -10,11 +10,13 @@ import (
 )
 
 func main() {
+	ginEngin := gin.Default()
+	ginEngin.Use(middlewares.LoggerToFile(), gin.Recovery())
+	ginEngin.Use(middlewares.CORSMiddleware())
+
 	DBAdapter := databases.NewSQLAdapter()
 	seeds.SeedUsers(DBAdapter)
 
-	ginEngin := gin.Default()
-	ginEngin.Use(middlewares.CORSMiddleware())
 	ginEngin.Use(middlewares.DBMiddleware(DBAdapter))
 
 	// Routes
