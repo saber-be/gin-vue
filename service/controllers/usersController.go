@@ -20,12 +20,16 @@ func GetUsers(c *gin.Context) {
 
 	// get search key from query
 	search := c.Query("search")
+	var err error
 	if search != "" {
-		DBInstance.Find(&users, &pagination, "name like ?", "%"+search+"%")
+		err = DBInstance.Find(&users, &pagination, "name like ?", "%"+search+"%")
 	} else {
-		DBInstance.Find(&users, &pagination)
+		err = DBInstance.Find(&users, &pagination)
 	}
-
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": users, "pagination": pagination})
 }
 
@@ -36,7 +40,11 @@ func GetUserByID(c *gin.Context) {
 	var user []models.User
 	DBInstance := c.MustGet("db").(databases.IDBAdapter)
 
-	DBInstance.Find(&user, nil, "id = ?", c.Param("id"))
+	err := DBInstance.Find(&user, nil, "id = ?", c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	if len(user) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
@@ -59,8 +67,11 @@ func CreateUser(c *gin.Context) {
 	// Create user
 	user := models.User{Name: input.Name, Email: input.Email, Phone: input.Phone, Age: input.Age}
 	DBInstance := c.MustGet("db").(databases.IDBAdapter)
-	DBInstance.Create(&user)
 
+	if err := DBInstance.Create(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
@@ -85,8 +96,11 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	DBInstance.Update(&user[0], models.User{Name: input.Name, Email: input.Email, Phone: input.Phone, Age: input.Age})
-
+	err := DBInstance.Update(&user[0], models.User{Name: input.Name, Email: input.Email, Phone: input.Phone, Age: input.Age})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
@@ -103,7 +117,9 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
-	DBInstance.Delete(&user)
-
+	if err := DBInstance.Delete(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": true})
 }
