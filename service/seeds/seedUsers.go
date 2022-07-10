@@ -1,6 +1,7 @@
 package seeds
 
 import (
+	"math/rand"
 	"qgen/challange/databases"
 	"qgen/challange/models"
 
@@ -16,10 +17,13 @@ func SeedUsers(d databases.IDBAdapter) {
 	}
 
 	for i := 0; i < 100; i++ {
+		min := 18
+		max := 100
 		user := models.User{
 			Name:  faker.Name(),
 			Email: faker.Email(),
 			Phone: faker.Phonenumber(),
+			Age:   uint(rand.Intn(max-min) + min),
 		}
 		d.Create(&user)
 	}

@@ -5,16 +5,12 @@ type User struct {
 	Name  string `json:"name"`
 	Email string `json:"email"`
 	Phone string `json:"phone"`
+	Age   uint   `json:"age"`
 }
 
-type CreateUserInput struct {
+type UserInput struct {
 	Name  string `json:"name" binding:"required"`
-	Email string `json:"email" binding:"required"`
+	Email string `json:"email" binding:"required,email"`
 	Phone string `json:"phone" binding:"required"`
-}
-
-type UpdateUserInput struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Phone string `json:"phone"`
+	Age   uint   `json:"age,string" binding:"required,min=18"`
 }
