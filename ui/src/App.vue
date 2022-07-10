@@ -5,6 +5,7 @@
     <el-table-column prop="name" label="Name" width="200" />
     <el-table-column prop="email" label="Email" width="200" />
     <el-table-column prop="phone" label="Phone" width="180" />
+    <el-table-column prop="age" label="Age" width="80" />
     <el-table-column align="right">
       <template #header>
         <el-input v-debounce:300ms="getUsers" v-model="search" size="small" placeholder="Type to search" />
@@ -34,7 +35,7 @@
       </template>
     </el-table-column>
   </el-table>
-  <el-button size="small" @click="handleCreate()"
+  <el-button size="small" @click="handleCreate()" 
           >add New user</el-button
         >
   <el-pagination background layout="prev, pager, next" 
@@ -47,26 +48,44 @@
   />
   
   <!-- user modal -->
-  <el-dialog v-model="dialogFormVisible" title="Edit user info">
-    <el-form :model="selected_user">
+  <el-dialog v-model="dialogFormVisible" :title="action + ' user'">
+      <Form 
+      v-slot="{ handleSubmit }"
+      @submit="confirmEvent" 
+      :model="selected_user" 
+      :validation-schema="schema"
+      @invalid-submit="onInvalidSubmit"
+      ref = "UserForm"
+      >
+    
       <el-form-item label="Name" :label-width="formLabelWidth">
-        <el-input v-model="selected_user.name" autocomplete="off" />
+        <Field name="name" v-model="selected_user.name"/>
+        <ErrorMessage name="name"  />
       </el-form-item>
       <el-form-item label="Email" :label-width="formLabelWidth">
-        <el-input v-model="selected_user.email" autocomplete="off" />
+        <Field name="email" type="email" v-model="selected_user.email" />
+        <ErrorMessage name="email" />
       </el-form-item>
       <el-form-item label="Phone" :label-width="formLabelWidth">
-        <el-input v-model="selected_user.phone" autocomplete="off" />
+        <Field name="phone" v-model="selected_user.phone" />
+        <ErrorMessage name="phone" />
       </el-form-item>
-    </el-form>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="confirmEvent"
-          >Confirm</el-button
-        >
-      </span>
-    </template>
+      <el-form-item label="Age" :label-width="formLabelWidth">
+        <Field name="age"  :min="18" :max="100"  type="number" v-model="selected_user.age" 
+        />
+        <div>
+          <ErrorMessage name="age" />
+        </div>
+      </el-form-item>
+    
+      
+        <span class="dialog-footer">
+          <el-button @click="dialogFormVisible = false">Cancel</el-button>
+          
+          <el-button @click="handleSubmit($event, confirmEvent)" class="submit-btn" >Submit</el-button>
+        </span>
+    </Form>
+      
   </el-dialog>
 
   </div>
@@ -77,28 +96,51 @@
 <script>
 
 import { ElNotification } from 'element-plus'
+import { InfoFilled } from '@element-plus/icons-vue'
+import { Form ,ErrorMessage,Field} from 'vee-validate';
+import {object,string,number} from 'yup';
 export default {
   name: 'App',
   components: {
-    
+    Form,
+    Field,
+    ErrorMessage
   },
   data() {
+    
+    const schema = object({
+      name: string().required('Name is required'),
+      email: string().required().email(),
+      phone: string().required(),
+      age: number().required().min(18, 'Age must be 18 or older'),
+    });
     return {
+      InfoFilled,
       search : '',
       users : [],
-      selected_user : {},
+      selected_user : {
+        id : '',
+        name : '',
+        email : '',
+        phone : '',
+        age : null
+      
+      },
       dialogFormVisible : false,
       action : '',
       actions:{
-        'create' : this.createUser,
-        'update' : this.updateUser,
-        'delete' : this.deleteUser
+        'Create' : this.createUser,
+        'Update' : this.updateUser,
+        'Delete' : this.deleteUser
       },
       pagination : {
         page : 1,
         limit : 12,
         total : 0
       },
+      schema,
+      formLabelWidth: '120px'
+      
     }
   },
   created() {
@@ -192,22 +234,26 @@ export default {
       this.getUsers();
     },
     handleCreate(){
-      this.action = 'create'
+      if(this.$refs.UserForm){
+        this.$refs.UserForm.resetForm();
+      }
+      this.action = 'Create'
       this.selected_user = {
-        name : null,
-        email : null,
-        phone: null
+        name : '',
+        email : '',
+        phone: '',
+        age: null
       }
       this.dialogFormVisible = true;
     },
     handleEdit(_index, row) {
       this.selected_user = row;
       this.dialogFormVisible = true;
-      this.action= 'update'
+      this.action= 'Update'
     },
     handleDelete(_index, row){
       this.selected_user = row;
-      this.action = 'delete'
+      this.action = 'Delete'
     },
   
     cancelEvent() {
@@ -217,8 +263,14 @@ export default {
     },
     confirmEvent() {
       this.actions[this.action](this.selected_user.id);
+    },
+    onInvalidSubmit() {
+      ElNotification.error({
+        title: 'Error',
+        message: 'Form is invalid',
+        duration: 2000
+      })
     }
-
   }
 }
 </script>
