@@ -156,6 +156,7 @@ export default {
         })
     },
     createUser() {
+      this.selected_user.age = parseInt(this.selected_user.age);
       fetch('http://localhost:8086/api/v1/users/', {
         method: 'POST',
         headers: {
