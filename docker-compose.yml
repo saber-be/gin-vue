@@ -1,0 +1,29 @@
+version: '3'
+services:
+  vue:
+    build: ./ui
+    image: vueapp:0.0.2
+    container_name: "vue_app_container"
+    ports:
+      - "8089:8080"
+    depends_on:
+      - api
+  db:
+    image: mysql/mysql-server:5.7
+    ports:
+      - "3305:3306"
+    environment:
+      - "MYSQL_ROOT_PASSWORD=notSecureChangeMe"
+      - "MYSQL_USER=root"
+      - "MYSQL_PASSWORD=notSecureChangeMe"
+      - "MYSQL_DATABASE=qgen"   
+  api:
+    build: ./service
+    image: ginpp:0.0.1
+    container_name: "gin_app_container"
+    ports:
+      - "8086:8080"
+    depends_on:
+      - db
+    links:
+      - "db:database"
