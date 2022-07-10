@@ -186,6 +186,7 @@ export default {
         })
     },
     updateUser(id) {
+      this.selected_user.age = parseInt(this.selected_user.age);
       fetch('http://localhost:8086/api/v1/users/'+id, {
         method: 'PATCH',
         headers: {
