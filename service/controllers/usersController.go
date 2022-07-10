@@ -49,7 +49,7 @@ func GetUserByID(c *gin.Context) {
 // Create a user
 func CreateUser(c *gin.Context) {
 	// Validate input
-	var input models.CreateUserInput
+	var input models.UserInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -57,7 +57,7 @@ func CreateUser(c *gin.Context) {
 	}
 
 	// Create user
-	user := models.User{Name: input.Name, Email: input.Email, Phone: input.Phone}
+	user := models.User{Name: input.Name, Email: input.Email, Phone: input.Phone, Age: input.Age}
 	DBInstance := c.MustGet("db").(databases.IDBAdapter)
 	DBInstance.Create(&user)
 
@@ -78,14 +78,14 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	// Validate input
-	var input models.UpdateUserInput
+	var input models.UserInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	DBInstance.Update(&user[0], models.User{Name: input.Name, Email: input.Email, Phone: input.Phone})
+	DBInstance.Update(&user[0], models.User{Name: input.Name, Email: input.Email, Phone: input.Phone, Age: input.Age})
 
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
