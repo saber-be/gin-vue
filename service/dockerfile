@@ -1,0 +1,14 @@
+FROM golang:alpine
+
+ENV GIN_MODE=release
+ENV PORT=3004
+
+WORKDIR /src
+
+COPY src /src
+
+RUN go build .
+
+EXPOSE $PORT
+
+CMD ["go", "run", "."]
