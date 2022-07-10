@@ -45,7 +45,7 @@ func DBMiddleware(d databases.IDBAdapter) gin.HandlerFunc {
 //log to file
 func LoggerToFile() gin.HandlerFunc {
 
-	logFilePath := "/media/saber/DATA/programming/go/QGen/service/src/logs/"
+	logFilePath := "logs/"
 	logFileName := "logs"
 
 	//log file

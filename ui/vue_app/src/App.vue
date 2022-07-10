@@ -17,8 +17,6 @@
         <el-popconfirm
           confirm-button-text="Yes"
           cancel-button-text="No, Thanks"
-          :icon="InfoFilled"
-          icon-color="#626AEF"
           title="Are you sure to delete this?"
           @confirm="confirmEvent"
           @cancel="cancelEvent"
@@ -35,9 +33,7 @@
       </template>
     </el-table-column>
   </el-table>
-  <el-button size="small" @click="handleCreate()" 
-          >add New user</el-button
-        >
+  <el-button size="small" @click="handleCreate()" >add New user</el-button>
   <el-pagination background layout="prev, pager, next" 
     :total="pagination.total"  
     @prev-click="prevPage" 
@@ -55,7 +51,7 @@
       :model="selected_user" 
       :validation-schema="schema"
       @invalid-submit="onInvalidSubmit"
-      ref = "UserForm"
+      :key="selected_user.id"
       >
     
       <el-form-item label="Name" :label-width="formLabelWidth">
@@ -71,21 +67,15 @@
         <ErrorMessage name="phone" />
       </el-form-item>
       <el-form-item label="Age" :label-width="formLabelWidth">
-        <Field name="age"  :min="18" :max="100"  type="number" v-model="selected_user.age" 
-        />
-        <div>
+        <Field name="age"  :min="18" :max="100"  type="number" v-model="selected_user.age"/>
           <ErrorMessage name="age" />
-        </div>
       </el-form-item>
     
-      
-        <span class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">Cancel</el-button>
-          
-          <el-button @click="handleSubmit($event, confirmEvent)" class="submit-btn" >Submit</el-button>
-        </span>
+      <span class="dialog-footer">
+        <el-button @click="cancelEvent">Cancel</el-button>
+        <el-button @click="handleSubmit($event, confirmEvent)" class="submit-btn" >Submit</el-button>
+      </span>
     </Form>
-      
   </el-dialog>
 
   </div>
@@ -96,7 +86,6 @@
 <script>
 
 import { ElNotification } from 'element-plus'
-import { InfoFilled } from '@element-plus/icons-vue'
 import { Form ,ErrorMessage,Field} from 'vee-validate';
 import {object,string,number} from 'yup';
 export default {
@@ -115,17 +104,9 @@ export default {
       age: number().required().min(18, 'Age must be 18 or older'),
     });
     return {
-      InfoFilled,
       search : '',
       users : [],
-      selected_user : {
-        id : '',
-        name : '',
-        email : '',
-        phone : '',
-        age : null
-      
-      },
+      selected_user : {},
       dialogFormVisible : false,
       action : '',
       actions:{
@@ -235,16 +216,8 @@ export default {
       this.getUsers();
     },
     handleCreate(){
-      if(this.$refs.UserForm){
-        this.$refs.UserForm.resetForm();
-      }
       this.action = 'Create'
-      this.selected_user = {
-        name : '',
-        email : '',
-        phone: '',
-        age: null
-      }
+      this.selected_user = {};
       this.dialogFormVisible = true;
     },
     handleEdit(_index, row) {
@@ -258,9 +231,9 @@ export default {
     },
   
     cancelEvent() {
-      console.log('cancel');
-      this.selected_user = {};
+      this.selected_user = {}
       this.action = '';
+      this.dialogFormVisible = false;
     },
     confirmEvent() {
       this.actions[this.action](this.selected_user.id);
